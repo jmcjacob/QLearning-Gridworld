@@ -39,8 +39,8 @@ public class QLearningGridWorld {
         // Initialises the Grid, actions and rewards.
         grid = new int[height][width];
         actions = new int[height*width][];
-        rewards = new int[height][width];
-        qScores = new double[height][width];
+        rewards = new int[height*width][height*width];
+        qScores = new double[height*width][height*width];
 
         // Numbers the states within the grid.
         int counter = 1;
@@ -70,12 +70,21 @@ public class QLearningGridWorld {
 
         // Sets the Learning Rate and Discount Rate based on user preference.
         System.out.println("What is the X coordinate for the goal?");
-        int x = scanner.nextInt();
+        int x = scanner.nextInt() - 1;
         System.out.println("What is the Y coordinate for the goal?");
-        int y = scanner.nextInt();
-        rewards[x][y] = 100;                // Sets the reward for the goal state.
-        goal = grid[x][y];                  // Gets the state from the grid world.
-        actions[goal] = new int[] {goal};   // Removes all possible actions from goal.
+        int y = scanner.nextInt() - 1;
+
+        goal = grid[x][y] - 1;                       // Gets the state from the grid world.
+        if (x != 0)                                 // Sets the rewards to 100 for moving into the goal.
+            rewards[goal-1][goal] = 100;
+        if (y != 0)
+            rewards[goal-width][goal] = 100;
+        if (x != height-1)
+            rewards[goal+1][goal] = 100;
+        if (y != width-1)
+            rewards[goal+width][goal] = 100;
+        actions[goal-1] = new int[] {goal};   // Removes all possible actions from goal.
+        goal++;
         System.out.println("Goal State: " + goal);
 
         // Sets the Learning Rate and Discount Rate based on user preference.
@@ -92,16 +101,36 @@ public class QLearningGridWorld {
          */
         Random random = new Random();
         for(int i = 0; i < episodes; i++) {
-            int state = random.nextInt(height*width);
+            int state = random.nextInt(height*width - 1);
             while (state != goal) {
-                int[] stateActions = actions[state];
+                int[] stateActions = actions[state-1];
                 int action = stateActions[random.nextInt(stateActions.length)];
                 while(action == 0) {
                     action = stateActions[random.nextInt(stateActions.length)];
                 }
-                int next = action;
 
-                double q = qScores[state][action];
+                double q = qScores[state - 1][action - 1];
+                int reward = rewards[state - 1][action - 1];
+                double max = Double.MIN_VALUE;
+                for(int j = 0; j < stateActions.length; j++) {
+                    if (stateActions[j] != 0) {
+                        double value = qScores[state - 1][stateActions[j] - 1];
+
+                        if (value > max)
+                            max = value;
+                    }
+                }
+
+                double score = q + learningRate * (reward + discountRate * max - q);
+                qScores[state - 1][action - 1] = score;
+
+                state = action;
+            }
+        }
+        for(int i = 0; i < (height*width); i++) {
+            System.out.print((i+1) + ": ");
+            for(int j = 0; j < qScores[i].length; j++) {
+                System.out.print(qScores[i][j] + " ");
             }
         }
     }
