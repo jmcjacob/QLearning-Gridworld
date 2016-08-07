@@ -86,22 +86,24 @@ public class QLearning {
         int x = scanner.nextInt() - 1;
         System.out.println("What is the Y coordinate for the goal?");
         int y = scanner.nextInt() - 1;
-        System.out.println("What reward for non-goal states would you like to set?");
+        System.out.println("What reward for the goal state would you like to set?");
         double reward = scanner.nextDouble();
+        System.out.println("What reward for non-goal states would you like to set?");
+        double nonReward = scanner.nextDouble();
 
         rewards = new double[height*width][height*width];
         goal = grid[y][x];                                                                                              // Sets the goal state from the Grid.
 
-        if (x != 0) {rewards[goal - 1][goal] = 100;}                                                                    // Sets the rewards for the goal position.
-        if (y != 0) {rewards[goal - width][goal] = 100;}
-        if (x != width-1) {rewards[goal + 1][goal] = 100;}
-        if (y != height-1) {rewards[goal + width][goal] = 100;}
+        if (x != 0) {rewards[goal - 1][goal] = reward;}                                                                 // Sets the rewards for the goal position.
+        if (y != 0) {rewards[goal - width][goal] = reward;}
+        if (x != width-1) {rewards[goal + 1][goal] = reward;}
+        if (y != height-1) {rewards[goal + width][goal] = reward;}
 
-        if (reward == 0) {                                                                                              // Sets all other rewards to user preference.
+        if (nonReward == 0) {                                                                                           // Sets all other rewards to user preference.
             for (int i = 0; i < rewards.length; i++) {
                 for (int j = 0; j < rewards[i].length; j++) {
                     if (rewards[i][j] == 0)
-                        rewards[i][j] = reward;
+                        rewards[i][j] = nonReward;
                 }
             }
         }
